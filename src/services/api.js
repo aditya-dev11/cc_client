@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { BACKEND_URL } from '../utils/constants';
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
+  baseURL: `${BACKEND_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,7 +38,7 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh-token`, { refreshToken });
+        const res = await axios.post(`${BACKEND_URL}/api/auth/refresh-token`, { refreshToken });
 
         const { accessToken } = res.data;
         localStorage.setItem('token', accessToken);

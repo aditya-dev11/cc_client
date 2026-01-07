@@ -26,6 +26,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import DesignServicesIcon from '@mui/icons-material/DesignServices';
 import CodeIcon from '@mui/icons-material/Code';
 import api from '../services/api';
+import { BACKEND_URL } from '../utils/constants';
 import { useAuth } from '../context/AuthContext';
 
 // Common Components
@@ -230,7 +231,7 @@ function ProfilePage() {
                   <Button
                     variant="contained"
                     color="primary"
-                    href={`${import.meta.env.VITE_BACKEND_URL}${profile.Profile.resumeUrl}`}
+                    href={`${BACKEND_URL}${profile.Profile.resumeUrl}`}
                     target="_blank"
                     startIcon={<DescriptionIcon />}
                     sx={{

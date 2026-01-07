@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { BACKEND_URL } from '../utils/constants';
 import CareerForm from '../components/User/CareerForm';
 import PortfolioEditor from '../components/User/PortfolioEditor';
 
@@ -181,7 +182,7 @@ const UpdateProfilePage = () => {
                             <Button
                                 variant="text"
                                 color="primary"
-                                href={`${import.meta.env.VITE_BACKEND_URL}${profile.Profile.resumeUrl}`}
+                                href={`${BACKEND_URL}${profile.Profile.resumeUrl}`}
                                 target="_blank"
                                 sx={{ textTransform: 'none', fontWeight: 600 }}
                             >
