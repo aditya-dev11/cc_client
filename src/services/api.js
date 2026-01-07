@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://cc-backend-vsve.onrender.com/api',
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -37,7 +37,7 @@ api.interceptors.response.use(
           throw new Error('No refresh token available');
         }
 
-        const res = await axios.post('http://localhost:3000/api/auth/refresh-token', { refreshToken });
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh-token`, { refreshToken });
 
         const { accessToken } = res.data;
         localStorage.setItem('token', accessToken);

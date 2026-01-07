@@ -230,7 +230,7 @@ function ProfilePage() {
                   <Button
                     variant="contained"
                     color="primary"
-                    href={`http://localhost:3000${profile.Profile.resumeUrl}`}
+                    href={`${import.meta.env.VITE_BACKEND_URL}${profile.Profile.resumeUrl}`}
                     target="_blank"
                     startIcon={<DescriptionIcon />}
                     sx={{
