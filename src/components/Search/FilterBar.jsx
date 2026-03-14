@@ -14,14 +14,10 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-
 const FilterBar = ({
     search,
     setSearch,
     handleSearch,
-    handleSmartSearch,
-    userType,
-    setUserType,
     setFilterDrawerOpen,
     isMobile,
     loading
@@ -67,39 +63,21 @@ const FilterBar = ({
                     </InputAdornment>
                     <TextField
                         fullWidth
-                        placeholder="Try 'Alumni at Google' or 'React developers'..."
+                        placeholder="Try searching for a friend's name..."
                         variant="standard"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         onKeyPress={(e) => {
                             if (e.key === 'Enter') {
-                                // If query is long (>3 words), try smart search, otherwise normal
-                                if (search.trim().split(' ').length > 3) {
-                                    handleSmartSearch();
-                                } else {
-                                    handleSearch(true);
-                                }
+                                handleSearch(true);
                             }
                         }}
                         InputProps={{ disableUnderline: true }}
                         sx={{ ml: 1 }}
                     />
 
-                    <Tooltip title="AI Smart Search">
-                        <IconButton
-                            sx={{
-                                color: 'primary.main',
-                                p: 1,
-                                mr: 0.5,
-                                transition: 'all 0.2s',
-                                '&:hover': { bgcolor: 'rgba(255, 87, 34, 0.1)', transform: 'scale(1.1)' }
-                            }}
-                            onClick={handleSmartSearch}
-                            disabled={loading}
-                        >
-                            {loading ? <CircularProgress size={20} color="primary" /> : <AutoAwesomeIcon fontSize="small" />}
-                        </IconButton>
-                    </Tooltip>
+                    {/* Smart Search Removed for now */}
+
 
 
                     <IconButton
@@ -121,21 +99,6 @@ const FilterBar = ({
                 {/* Quick Filters (Desktop) */}
                 {!isMobile && (
                     <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 0.5 }}>
-                        {['', 'student', 'alumni'].map((type) => (
-                            <Chip
-                                key={type}
-                                label={type === '' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
-                                onClick={() => { setUserType(type); handleSearch(true); }}
-                                sx={{
-                                    bgcolor: userType === type ? 'rgba(255, 87, 34, 0.1)' : 'white',
-                                    color: userType === type ? 'primary.main' : '#111b21',
-                                    border: userType === type ? '1px solid' : '1px solid #e0e0e0',
-                                    borderColor: userType === type ? 'primary.main' : '#e0e0e0',
-                                    fontWeight: userType === type ? 600 : 400,
-                                    '&:hover': { bgcolor: userType === type ? 'rgba(255, 87, 34, 0.2)' : '#f7f7f7' }
-                                }}
-                            />
-                        ))}
                         <Button
                             variant="outlined"
                             startIcon={<FilterListIcon />}

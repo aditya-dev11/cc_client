@@ -23,7 +23,7 @@ const QuickActions = () => {
                     fullWidth
                     sx={{ justifyContent: 'center', py: 1.5, borderRadius: 2, border: '1px solid #e0e0e0', color: 'text.primary', '&:hover': { bgcolor: 'action.hover', borderColor: 'primary.main' } }}
                 >
-                    Find Students
+                    Explore Users
                 </Button>
 
             </Stack>

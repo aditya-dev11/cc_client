@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Container, Alert } from '@mui/material';
-import api from '../services/api';
+import { auth } from '../firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 function AccountRecoveryPage() {
   const [error, setError] = useState('');
@@ -11,24 +12,13 @@ function AccountRecoveryPage() {
     setError('');
     setSuccess('');
     const data = new FormData(event.currentTarget);
-    const rollNumber = data.get('rollNumber');
-    const collegeSubdomain = data.get('collegeSubdomain');
-    const newPassword = data.get('newPassword');
-    const dob = data.get('dob');
+    const email = data.get('email');
 
     try {
-      const response = await api.post('/auth/recover-password', {
-        rollNumber,
-        collegeSubdomain,
-        newPassword,
-        dob
-      });
-
-      if (response.data.success) {
-        setSuccess(response.data.message);
-      }
+      await sendPasswordResetEmail(auth, email);
+      setSuccess('Password reset email sent! Check your inbox.');
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred.');
+      setError(err.message || 'An error occurred.');
     }
   };
 
@@ -52,39 +42,11 @@ function AccountRecoveryPage() {
             margin="normal"
             required
             fullWidth
-            id="rollNumber"
-            label="Roll Number"
-            name="rollNumber"
+            id="email"
+            label="Email Address"
+            name="email"
+            autoComplete="email"
             autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="collegeSubdomain"
-            label="College Subdomain"
-            id="collegeSubdomain"
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="dob"
-            label="Date of Birth"
-            type="date"
-            id="dob"
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="newPassword"
-            label="New Password"
-            type="password"
-            id="newPassword"
           />
           <Button
             type="submit"
@@ -92,7 +54,7 @@ function AccountRecoveryPage() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Reset Password
+            Send Reset Email
           </Button>
         </Box>
       </Box>

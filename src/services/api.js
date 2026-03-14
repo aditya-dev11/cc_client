@@ -54,7 +54,7 @@ api.interceptors.response.use(
         console.error('Token refresh failed:', refreshError);
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        // Removed forced window.location redirect to prevent infinite loops with Firebase
         return Promise.reject(refreshError);
       }
     }

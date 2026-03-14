@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Container, Avatar, Alert } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, Typography, Container, Avatar, Alert, CircularProgress } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate, Navigate, Link } from 'react-router-dom';
-import api from '../services/api';
+import { useNavigate, Link } from 'react-router-dom';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { getUserProfile } from '../services/firestoreService';
+import { getFirebaseErrorMessage } from '../utils/firebaseErrors';
 
 function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -16,32 +24,21 @@ function LoginPage() {
     const data = new FormData(event.currentTarget);
     const email = data.get('email');
     const password = data.get('password');
-    const collegeSubdomain = data.get('collegeSubdomain');
 
     try {
-      const response = await api.post('/auth/login', {
-        login: email,
-        password,
-        collegeSubdomain: collegeSubdomain || null
-      });
-
-      if (response.data.success) {
-        // The token includes 'Bearer ' (optional check, but backend sends raw token now? No, backend sends raw token in new code)
-        // Wait, my backend code sends: { success: true, accessToken, refreshToken }
-        // The old code sent: { success: true, token: 'Bearer ' + token }
-        // I need to be careful. My new backend code sends raw tokens.
-
-        const { accessToken, refreshToken } = response.data;
-        login(accessToken, refreshToken);
-        navigate('/');
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      // The useEffect will handle the redirection once isAuthenticated becomes true
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred during login.');
+      setError(getFirebaseErrorMessage(err));
     }
   };
 
   if (isAuthenticated) {
-    return <Navigate to="/" />;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
@@ -82,13 +79,7 @@ function LoginPage() {
             id="password"
             autoComplete="current-password"
           />
-          <TextField
-            margin="normal"
-            fullWidth
-            name="collegeSubdomain"
-            label="College Subdomain (optional)"
-            id="collegeSubdomain"
-          />
+
           <Button
             type="submit"
             fullWidth
@@ -97,9 +88,14 @@ function LoginPage() {
           >
             Sign In
           </Button>
-          <Link to="/recover-account" variant="body2">
-            Forgot password?
-          </Link>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+            <Link to="/recover-account" variant="body2">
+              Forgot password?
+            </Link>
+            <Link to="/signup" variant="body2">
+              Don't have an account? Sign Up
+            </Link>
+          </Box>
         </Box>
       </Box>
     </Container>

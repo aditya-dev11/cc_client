@@ -1,48 +1,69 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { onAuthStateChanged, signOut, deleteUser } from 'firebase/auth';
+import { auth } from '../firebase';
+import { getUserProfile, deleteUserProfile } from '../services/firestoreService';
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        console.log(decoded)
-        setUser(decoded);
-      } catch (error) {
-        console.error("Invalid token:", error);
-        logout();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        try {
+          const profile = await getUserProfile(currentUser.uid);
+          // Merge Firebase Auth info with Firestore Profile info (so we get .username)
+          setUser({ ...currentUser, ...profile });
+        } catch (error) {
+          console.error("Error fetching user profile in auth context:", error);
+          setUser(currentUser);
+        }
+      } else {
+        setUser(null);
       }
-    }
-  }, [token]);
+      setLoading(false);
+    });
 
-  const login = (accessToken, refreshToken) => {
-    setToken(accessToken);
-    localStorage.setItem('token', accessToken);
-    if (refreshToken) {
-      localStorage.setItem('refreshToken', refreshToken);
+    return () => unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
+  const deleteAccount = async () => {
+    try {
+      if (auth.currentUser) {
+        // Delete Firestore profile first
+        await deleteUserProfile(auth.currentUser.uid);
+        // Delete Firebase Auth user
+        await deleteUser(auth.currentUser);
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      throw error;
+    }
   };
 
   const value = {
     user,
-    token,
-    login,
     logout,
-    isAuthenticated: !!token,
+    deleteAccount,
+    isAuthenticated: !!user,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

@@ -18,12 +18,12 @@ import HomeIcon from '@mui/icons-material/HomeRounded';
 import SearchIcon from '@mui/icons-material/SearchRounded';
 
 import PersonIcon from '@mui/icons-material/PersonRounded';
-import SupportAgentIcon from '@mui/icons-material/SupportAgentRounded';
 import LogoutIcon from '@mui/icons-material/LogoutRounded';
 import MenuIcon from '@mui/icons-material/MenuRounded';
 import { useAuth } from '../context/AuthContext';
 import LoginIcon from '@mui/icons-material/LoginRounded';
-import AnalyticsIcon from '@mui/icons-material/AnalyticsRounded';
+import PeopleIcon from '@mui/icons-material/PeopleRounded';
+import ChatIcon from '@mui/icons-material/ChatRounded';
 
 const drawerWidth = 280;
 const collapsedDrawerWidth = 88;
@@ -40,11 +40,10 @@ function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // If these roles, they have their own dashboards
-  if (user?.role === 'SUPER_ADMIN' || user?.role === 'COLLEGE_ADMIN') return null;
 
-  // Hide Navbar on Login and Recovery pages
-  if (location.pathname === '/login' || location.pathname === '/recover-account') return null;
+
+  // Hide Navbar on Login, Signup, Recovery pages and public landing page
+  if (['/login', '/signup', '/recover-account', '/onboarding'].includes(location.pathname) || (location.pathname === '/' && !user)) return null;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -56,12 +55,10 @@ function Navbar() {
   };
 
   const navItems = user ? [
-    { label: 'Feed', icon: <HomeIcon />, path: '/' },
+    { label: 'My Groups', icon: <PeopleIcon />, path: '/groups' },
+    { label: 'My Chats', icon: <ChatIcon />, path: '/chats' },
     { label: 'Explore', icon: <SearchIcon />, path: '/search' },
-
     { label: 'Profile', icon: <PersonIcon />, path: `/profile/${user.username}` },
-    { label: 'Analytics', icon: <AnalyticsIcon />, path: '/analytics' },
-    { label: 'My Support', icon: <SupportAgentIcon />, path: '/support' },
   ] : [
     { label: 'Home', icon: <HomeIcon />, path: '/login' },
   ];
@@ -75,14 +72,14 @@ function Navbar() {
       <Box sx={{ mb: 5, px: isCollapsed ? 0 : 2, pt: 1, display: 'flex', justifyContent: isCollapsed ? 'center' : 'flex-start' }}>
         {isCollapsed ? (
           <Box
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/groups')}
             sx={{
               width: 40, height: 40, bgcolor: 'primary.main', borderRadius: 2,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'white', fontWeight: 'bold', fontSize: '1.2rem', cursor: 'pointer'
             }}
           >
-            CC
+            M
           </Box>
         ) : (
           <Typography
@@ -96,9 +93,9 @@ function Navbar() {
               gap: 1,
               cursor: 'pointer'
             }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/groups')}
           >
-            CollegeConnect.
+            Manam.
           </Typography>
         )}
       </Box>
@@ -136,6 +133,7 @@ function Navbar() {
                   '& .MuiSvgIcon-root': { fontSize: 28 }
                 }}>
                   {item.icon}
+
                 </ListItemIcon>
                 {!isCollapsed && (
                   <ListItemText
@@ -238,7 +236,7 @@ function Navbar() {
 
           <Typography
             variant="h6"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/groups')}
             sx={{
               fontWeight: 800,
               cursor: 'pointer',
@@ -249,7 +247,7 @@ function Navbar() {
               fontSize: '1.3rem',
             }}
           >
-            CollegeConnect
+            Manam
           </Typography>
 
           <Box sx={{ width: 40, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

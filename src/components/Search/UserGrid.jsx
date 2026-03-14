@@ -17,14 +17,12 @@ const UserGrid = ({ users }) => {
             {users.map((user) => {
                 // Helper to get initials
                 const getInitials = () => {
-                    if (user.Profile?.fullName) {
-                        const names = user.Profile.fullName.trim().split(' ');
-                        if (names.length >= 2) {
-                            return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-                        }
-                        return names[0].slice(0, 2).toUpperCase();
+                    const nameToUse = user.displayName || user.username || '?';
+                    const names = nameToUse.trim().split(' ');
+                    if (names.length >= 2) {
+                        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
                     }
-                    return user.username.slice(0, 2).toUpperCase();
+                    return nameToUse.slice(0, 2).toUpperCase();
                 };
 
                 return (
@@ -49,10 +47,10 @@ const UserGrid = ({ users }) => {
                         >
                             <Link to={`/profile/${user.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                 <Box sx={{ position: 'relative', overflow: 'hidden', borderRadius: '12px 12px 0 0', height: 140, bgcolor: '#f0f2f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {user.Profile?.profilePictureUrl ? (
+                                    {user.profilePicture ? (
                                         <CardMedia
                                             component="img"
-                                            image={user.Profile.profilePictureUrl}
+                                            image={user.profilePicture}
                                             alt={user.username}
                                             sx={{
                                                 width: '100%',
@@ -65,22 +63,6 @@ const UserGrid = ({ users }) => {
                                             {getInitials()}
                                         </Typography>
                                     )}
-                                    <Chip
-                                        label={user.role === 'ALUMNI' ? 'Alumni' : 'Student'}
-                                        size="small"
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 6,
-                                            right: 6,
-                                            bgcolor: 'rgba(255,255,255,0.95)',
-                                            backdropFilter: 'blur(4px)',
-                                            fontWeight: 700,
-                                            fontSize: '0.6rem',
-                                            height: 18,
-                                            px: 0.5,
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                        }}
-                                    />
                                 </Box>
 
                                 <CardContent sx={{ p: 1.5, pb: '12px !important' }}>
@@ -98,26 +80,12 @@ const UserGrid = ({ users }) => {
                                             display: 'block'
                                         }}
                                     >
-                                        {user.Profile?.fullName || user.username}
+                                        {user.displayName || user.username || 'Unknown User'}
                                     </Typography>
 
                                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', fontSize: '0.7rem', mb: 0.5 }}>
-                                        {user.Profile?.department || 'N/A'} • {user.Profile?.graduationYear || 'N/A'}
+                                        {user.headline || 'No Headline'}
                                     </Typography>
-
-                                    {user.Experiences && user.Experiences.length > 0 && (
-                                        <Typography variant="caption" sx={{
-                                            display: 'block',
-                                            color: 'primary.main',
-                                            fontWeight: 600,
-                                            fontSize: '0.7rem',
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis'
-                                        }}>
-                                            {user.Experiences[0].Company?.name}
-                                        </Typography>
-                                    )}
                                 </CardContent>
                             </Link>
                         </Card>

@@ -15,33 +15,22 @@ import api from '../../services/api';
 const FilterDrawerContent = ({
     isMobile,
     setFilterDrawerOpen,
-    companyOptions,
-    setCompanyOptions,
-    companyLoading,
-    setCompanyLoading,
-    companyInput,
-    setCompanyInput,
-    addCompany,
-    selectedCompanies,
-    removeCompany,
-    skillOptions,
-    setSkillOptions,
-    skillLoading,
-    setSkillLoading,
+    gender,
+    setGender,
+    maritalStatus,
+    setMaritalStatus,
+    interestInput,
+    setInterestInput,
+    addInterest,
+    selectedInterests,
+    removeInterest,
     skillInput,
     setSkillInput,
     addSkill,
     selectedSkills,
     removeSkill,
     handleClearFilters,
-    handleApplyFilters,
-    graduationYear,
-    setGraduationYear,
-    department,
-    setDepartment,
-    section,
-    setSection,
-    deptOptions
+    handleApplyFilters
 }) => {
     return (
         <Box sx={{ p: 3, width: isMobile ? 'auto' : 400, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -54,120 +43,81 @@ const FilterDrawerContent = ({
 
             <Box sx={{ flexGrow: 1, overflowY: 'auto', pr: 1 }}>
 
-                {/* Year, Dept, Section Filters */}
+                {/* Personal Details Filters */}
                 <Box sx={{ mb: 4 }}>
-                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>Academic</Typography>
+                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>Personal Details</Typography>
 
                     <Box sx={{ mb: 2 }}>
-                        <Autocomplete
-                            multiple
-                            options={Array.from({ length: 15 }, (_, i) => String(new Date().getFullYear() - i))}
-                            value={graduationYear}
-                            onChange={(event, newValue) => {
-                                setGraduationYear(newValue);
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Graduation Year"
-                                    placeholder="Select Year"
-                                    size="small"
-                                />
-                            )}
-                        />
-                    </Box>
-
-                    <Box sx={{ mb: 2 }}>
-                        <Autocomplete
-                            multiple
-                            options={deptOptions}
-                            value={department}
-                            onChange={(event, newValue) => {
-                                setDepartment(newValue);
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    variant="outlined"
-                                    label="Department"
-                                    placeholder="Select Department"
-                                    size="small"
-                                />
-                            )}
-                        />
+                        <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            variant="outlined"
+                            label="Gender"
+                            value={gender}
+                            onChange={(e) => setGender(e.target.value)}
+                            SelectProps={{ native: true }}
+                        >
+                            <option value=""></option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </TextField>
                     </Box>
 
                     <Box sx={{ mb: 2 }}>
                         <TextField
+                            select
                             fullWidth
-                            label="Section"
-                            placeholder="e.g. A"
                             size="small"
-                            value={section}
-                            onChange={(e) => setSection(e.target.value)}
-                        />
+                            variant="outlined"
+                            label="Marital Status"
+                            value={maritalStatus}
+                            onChange={(e) => setMaritalStatus(e.target.value)}
+                            SelectProps={{ native: true }}
+                        >
+                            <option value=""></option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </TextField>
                     </Box>
 
                     <Divider sx={{ my: 3 }} />
                 </Box>
 
-                {/* Company Filter */}
+                {/* Interests Filter */}
                 <Box sx={{ mb: 4 }}>
-                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>Company</Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Filter by companies they've worked at</Typography>
+                    <Typography variant="subtitle1" fontWeight="600" gutterBottom>Interests</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Filter by hobbies or interests</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                        <Autocomplete
-                            freeSolo
+                        <TextField
+                            size="small"
                             fullWidth
-                            options={companyOptions}
-                            getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-                            loading={companyLoading}
-                            value={companyInput}
-                            onInputChange={async (event, newInputValue) => {
-                                setCompanyInput(newInputValue);
-                                if (newInputValue.length > 1) {
-                                    setCompanyLoading(true);
-                                    try {
-                                        const res = await api.get(`/companies/search?query=${newInputValue}`);
-                                        setCompanyOptions(res.data);
-                                    } catch (err) {
-                                        console.error("Failed to fetch companies", err);
-                                    } finally {
-                                        setCompanyLoading(false);
-                                    }
-                                } else {
-                                    setCompanyOptions([]);
+                            placeholder="e.g. Photography"
+                            value={interestInput}
+                            onChange={(e) => setInterestInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && addInterest()}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2
                                 }
                             }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    size="small"
-                                    placeholder="e.g. Google"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2
-                                        }
-                                    }}
-                                    onKeyPress={(e) => e.key === 'Enter' && addCompany()}
-                                />
-                            )}
                         />
                         <Button
                             variant="contained"
-                            onClick={addCompany}
+                            onClick={addInterest}
                             color="primary"
                         >
                             Add
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {selectedCompanies.map(company => (
+                        {selectedInterests.map(interest => (
                             <Chip
-                                key={company}
-                                label={company}
-                                onDelete={() => removeCompany(company)}
+                                key={interest}
+                                label={interest}
+                                onDelete={() => removeInterest(interest)}
                                 sx={{ bgcolor: '#f7f7f7', border: '1px solid #e0e0e0' }}
                             />
                         ))}
@@ -181,42 +131,18 @@ const FilterDrawerContent = ({
                     <Typography variant="subtitle1" fontWeight="600" gutterBottom>Skills</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Filter by technical skills</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                        <Autocomplete
-                            freeSolo
+                        <TextField
+                            size="small"
                             fullWidth
-                            options={skillOptions}
-                            getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
-                            loading={skillLoading}
+                            placeholder="e.g. React"
                             value={skillInput}
-                            onInputChange={async (event, newInputValue) => {
-                                setSkillInput(newInputValue);
-                                if (newInputValue.length > 1) {
-                                    setSkillLoading(true);
-                                    try {
-                                        const res = await api.get(`/skills/search?query=${newInputValue}`);
-                                        setSkillOptions(res.data);
-                                    } catch (err) {
-                                        console.error("Failed to fetch skills", err);
-                                    } finally {
-                                        setSkillLoading(false);
-                                    }
-                                } else {
-                                    setSkillOptions([]);
+                            onChange={(e) => setSkillInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && addSkill()}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2
                                 }
                             }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    size="small"
-                                    placeholder="e.g. React"
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2
-                                        }
-                                    }}
-                                    onKeyPress={(e) => e.key === 'Enter' && addSkill()}
-                                />
-                            )}
                         />
                         <Button
                             variant="contained"

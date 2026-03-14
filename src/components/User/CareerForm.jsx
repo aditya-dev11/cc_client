@@ -21,9 +21,12 @@ import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { getUserProfile, saveUserProfile } from '../../services/firestoreService';
+import { extractTextFromPDF, parseResumeText } from '../../utils/resumeParser';
 
 function CareerForm({ onClose, onSave }) {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [experiences, setExperiences] = useState([]);
@@ -47,30 +50,30 @@ function CareerForm({ onClose, onSave }) {
 
   useEffect(() => {
     const fetchCareerData = async () => {
+      if (!user?.uid) return;
       try {
         setLoading(true);
-        const response = await api.get('/users/me');
-        const fetchedExperiences = (response.data.Experiences || []).map((exp) => ({
-          ...exp,
-          companyName: exp.Company?.name,
-        }));
+        const profileData = await getUserProfile(user.uid);
+        if (profileData) {
+          const fetchedExperiences = (profileData.experiences || []).map((exp) => ({
+            ...exp,
+          }));
 
-        setExperiences(fetchedExperiences);
-        setSkills(response.data.Skills || []);
+          setExperiences(fetchedExperiences);
+          setSkills(profileData.skills ? profileData.skills.map(s => ({ name: s })) : []);
 
-        // Load existing location
-        setCity(response.data.Profile?.city || '');
-        setCountry(response.data.Profile?.country || '');
-        setLocality(response.data.Profile?.locality || '');
-
+          setCity(profileData.city || '');
+          setCountry(profileData.country || '');
+          setLocality(profileData.locality || '');
+        }
         setLoading(false);
       } catch (err) {
-        setError(err.response?.data?.msg || 'Failed to fetch career data.');
+        setError('Failed to fetch career data.');
         setLoading(false);
       }
     };
     fetchCareerData();
-  }, []);
+  }, [user]);
 
   const handleExperienceChange = (index, field, value) => {
     const newExperiences = [...experiences];
@@ -118,12 +121,8 @@ function CareerForm({ onClose, onSave }) {
     formData.append('resume', selectedResumeFile);
 
     try {
-      const response = await api.post('/users/me/parse-resume', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const parsedData = response.data;
+      const text = await extractTextFromPDF(selectedResumeFile);
+      const parsedData = await parseResumeText(text);
 
       if (parsedData.experiences && Array.isArray(parsedData.experiences)) {
         // Sort parsed experiences by start date descending
@@ -192,16 +191,16 @@ function CareerForm({ onClose, onSave }) {
 
       const skillsToSave = skills.map(s => s.name);
 
-      await api.put('/users/me/career', {
+      await saveUserProfile(user.uid, {
         experiences: experiencesToSave,
         skills: skillsToSave,
         city,
         country,
         locality
       });
-      onSave();
+      if (onSave) onSave();
     } catch (err) {
-      setSaveError(err.response?.data?.msg || 'Failed to save career data.');
+      setSaveError('Failed to save career data.');
     }
   };
 
