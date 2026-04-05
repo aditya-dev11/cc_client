@@ -1,56 +1,66 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import SearchPage from './pages/SearchPage';
-import ProfilePage from './pages/ProfilePage';
-import AccountRecoveryPage from './pages/AccountRecoveryPage';
-import Navbar from './components/Navbar';
-import UpdateProfilePage from './pages/UpdateProfilePage';
-import NotFoundPage from './pages/NotFoundPage';
 import LandingPage from './pages/LandingPage';
-import ChatsPage from './pages/ChatsPage';
-import GroupsPage from './pages/GroupsPage';
-import GroupChatPage from './pages/GroupChatPage';
-import GroupJoinPage from './pages/GroupJoinPage';
+import AuthPage from './pages/AuthPage';
+import ProfilePage from './pages/ProfilePage';
+import DashboardPage from './pages/DashboardPage';
+import { Box, ThemeProvider, CssBaseline } from '@mui/material';
+import theme from './theme';
+import { AuthProvider, useAuth } from './utils/AuthContext';
 
-import './App.css';
+function AppRoutes() {
+  const { user, userData, loading } = useAuth();
 
-import { Box } from '@mui/material';
-
-function App() {
-  const { user, isAuthenticated } = useAuth();
+  if (loading) return null; // Or a sleek loader
 
   return (
-    <Router>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-        <Navbar />
-        <Box component="main" sx={{ flexGrow: 1, width: { xs: '100%', md: `calc(100% - 88px)`, lg: `calc(100% - 280px)` }, minHeight: '100vh', bgcolor: '#fff' }}>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/recover-account" element={<AccountRecoveryPage />} />
+    <Routes>
+      <Route path="/" element={
+        user ? (
+          userData?.onboarded ? <Navigate to="/dashboard" /> : <Navigate to="/profile" />
+        ) : (
+          <LandingPage />
+        )
+      } />
+      
+      <Route path="/auth" element={
+        user ? (
+          userData?.onboarded ? <Navigate to="/dashboard" /> : <Navigate to="/profile" />
+        ) : (
+          <AuthPage />
+        )
+      } />
 
-            {/* Public Landing Page */}
-            <Route path="/" element={isAuthenticated ? <ProtectedRoute><Dashboard /></ProtectedRoute> : <LandingPage />} />
+      <Route path="/profile" element={
+        user ? <ProfilePage /> : <Navigate to="/auth" />
+      } />
 
-            <Route path="/" element={<ProtectedRoute />}>
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/profile/:username" element={<ProfilePage />} />
-              <Route path="/update-profile" element={<UpdateProfilePage />} />
-              <Route path="/chats" element={<ChatsPage />} />
-              <Route path="/chats/:chatId" element={<ChatsPage />} />
-              <Route path="/groups" element={<GroupsPage />} />
-              <Route path="/groups/:groupId/chat" element={<GroupChatPage />} />
-              <Route path="/groups/join/:groupId" element={<GroupJoinPage />} />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Box>
-      </Box>
-    </Router>
+      <Route path="/dashboard" element={
+        user ? (
+          userData?.onboarded ? <DashboardPage /> : <Navigate to="/profile" />
+        ) : (
+          <Navigate to="/auth" />
+        )
+      } />
+
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <Router>
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Box component="main" sx={{ flexGrow: 1 }}>
+              <AppRoutes />
+            </Box>
+          </Box>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
